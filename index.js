@@ -6,7 +6,7 @@ dotenv.config();
 
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -43,6 +43,12 @@ async function run() {
     })
     app.get("/featured",async(req,res)=>{
       const result =await featuredCollection.find({}).toArray();
+      res.json(result);
+    })
+    app.get("/featured/:id",async(req,res)=>{
+      const { id } = req.params;
+      console.log(id,"from server")
+      const result =await featuredCollection.findOne({ _id:new ObjectId(id) });
       res.json(result);
     })
 
