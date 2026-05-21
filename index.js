@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
     const db = client.db("khela-hobe");
     const featuredCollection = db.collection("featured");
+    const bookingsCollection = db.collection("bookings");
     console.log("Successfully connected to MongoDB!");
 
     app.get("/", (req, res) => {
@@ -41,6 +42,12 @@ async function run() {
       const result =await featuredCollection.insertOne(facility);
       res.json(result);
     })
+    app.post("/booking",async(req,res)=>{
+      const booking=req.body;
+      const result =await bookingsCollection.insertOne(booking);
+      res.json(result);
+    })
+   
     app.get("/featured",async(req,res)=>{
       const result =await featuredCollection.find({}).toArray();
       res.json(result);
@@ -51,6 +58,16 @@ async function run() {
       const result =await featuredCollection.findOne({ _id:new ObjectId(id) });
       res.json(result);
     })
+    app.get("/booking/:userId",async(req,res)=>{
+      const { userId } = req.params;
+      const result =await bookingsCollection.find({ userId }).toArray();
+      res.json(result);
+    })
+    app.delete("/booking/:bookingId",async(req,res)=>{
+      const {bookingId}=req.params;
+      const result=await bookingsCollection.deleteOne({_id:new ObjectId(bookingId)});
+      res.json(result);
+    });
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
