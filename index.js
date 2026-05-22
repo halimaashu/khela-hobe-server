@@ -22,10 +22,11 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   },
-  
 });
 
-const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`));
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.CLIENT_URL}/api/auth/jwks`),
+);
 const veryFyToken = async (req, res, next) => {
   const authHeader = req?.headers?.authorization;
   const token = authHeader.split(" ")[1];
@@ -43,14 +44,14 @@ const veryFyToken = async (req, res, next) => {
 };
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const db = client.db("khela-hobe");
     const featuredCollection = db.collection("featured");
     const bookingsCollection = db.collection("bookings");
     console.log("Successfully connected to MongoDB!");
 
     app.get("/", (req, res) => {
-      // async unnecessary here since no await is used
+      
       res.send("khele hobe server is running");
     });
 
@@ -66,7 +67,20 @@ async function run() {
     });
 
     app.get("/featured", async (req, res) => {
-      const result = await featuredCollection.find({}).toArray();
+      const { search, sport } = req.query;
+
+      const filter = {};
+
+      if (search) {
+        filter.name = { $regex: search, $options: "" };
+      }
+
+      if (sport) {
+        const sports = Array.isArray(sport) ? sport : [sport];
+        filter.facility_type = { $in: sports };
+      }
+
+      const result = await featuredCollection.find(filter).toArray();
       res.json(result);
     });
     app.get("/featured/:id", veryFyToken, async (req, res) => {
