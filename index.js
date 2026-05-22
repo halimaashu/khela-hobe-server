@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
   
 });
 
-const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"));
+const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`));
 const veryFyToken = async (req, res, next) => {
   const authHeader = req?.headers?.authorization;
   const token = authHeader.split(" ")[1];
@@ -95,7 +95,7 @@ async function run() {
       console.log(`Server is running on port ${PORT}`);
     });
   } catch (err) {
-    console.error("MongoDB connection failed:", err); // ✅ Proper error handling
+    console.error("MongoDB connection failed:", err);
     process.exit(1);
   }
 }
